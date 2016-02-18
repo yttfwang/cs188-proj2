@@ -70,11 +70,44 @@ class ReflexAgent(Agent):
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
+        minFoodDist = 1E9
+        totGhostDist = 0
+        for x in range(newFood.width):
+          for y in range(newFood.height):
+            if newFood[x][y]:
+              foodManDist = abs(x - newPos[0]) + abs(y - newPos[1])
+              
+              if foodManDist < minFoodDist:
+                minFoodDist = foodManDist
+        invMinFoodDist = 1.0 / minFoodDist
         newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-
+        numAgents = successorGameState.getNumAgents()
+        
+        for i in range(1, numAgents):
+          ghostPos = successorGameState.getGhostPosition(i)
+          ghostManDist = abs(ghostPos[0] - newPos[0]) + abs(ghostPos[1] - newPos[1])
+          totGhostDist = totGhostDist + ghostManDist
+        invMinGhostDist = 1.0 / totGhostDist
+        # for x in range(newGhostStates.width):
+        #   for y in range(newGhostStates.height):
+        #     if newGhostStates[x][y]:
+        #       ghostManDist = abs(x - newPos[0]) + abs(y - newPos[1])
+        #       if ghostManDist < minGhostDist:
+        #         minGhostDist = ghostManDist
+        # invMinGhostDist = 1 / minGhostDist
+        # newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        # totalScareTime = 0
+        # for times in newScaredTimes:
+        #   totalScareTime = times + totalScareTime
+        # if totalScareTime != 0.0:
+        #   invScaredTimes = 1.0 / totalScareTime
+        # else:
+        #   invScaredTimes = 0
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        totalScore = successorGameState.getScore() + invMinFoodDist - invMinGhostDist 
+        #
+        #print totalScore
+        return totalScore
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -135,7 +168,81 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        finalLevel = gameState.getNumAgents() * self.depth 
+
+        def minimax(game_state, level):
+          agentIndex = level % self.depth
+          if level >= finalLevel:
+            print "Error with minimax function: levels_left should not be <= 0."
+            return None
+          
+          elif level == finalLevel - 1:
+            bestAction = ''
+            bestEvalNum = -999999
+            evalNum = -999999
+            
+            for action in game_state.getLegalActions(agentIndex):
+              newState = game_state.generateSuccessor(agentIndex, action)
+              
+              if newState.isWin():
+                evalNum += 500
+              elif newState.isLose():
+                evalNum += -500
+              else:
+                evalNum = self.evaluationFunction(newState)
+
+              if evalNum > bestEvalNum:
+                bestEvalNum = evalNum
+                bestAction = action
+            
+            return (bestEvalNum, bestAction)
+          
+          elif level % 3 == 0: #Pacman's turn, maximizer
+            bestAction = ''
+            highestEvalNum = -999999
+            evalNum = -999999
+            
+            for action in game_state.getLegalActions(agentIndex):
+              newState = game_state.generateSuccessor(agentIndex, action)
+              
+              if newState.isWin():
+                evalNum += 500
+              elif newState.isLose():
+                evalNum += -500
+              else:
+                evalNum , _ = minimax(newState, level + 1)
+
+              if evalNum > highestEvalNum:
+                highestEvalNum = evalNum
+                bestAction = action
+            
+            return (highestEvalNum, bestAction)
+
+          else: #Ghosts' turn, minimizer
+            bestAction = ''
+            lowestEvalNum = 999999
+            evalNum = 999999
+            
+            for action in game_state.getLegalActions(agentIndex):
+              newState = game_state.generateSuccessor(agentIndex, action)
+              
+              if newState.isWin():
+                evalNum += 500
+              elif newState.isLose():
+                evalNum += -500
+              else:
+                evalNum , _ = minimax(newState, level + 1)
+
+              if evalNum < lowestEvalNum:
+                lowestEvalNum = evalNum
+                bestAction = action
+            
+            return (lowestEvalNum, bestAction)
+
+
+        evalNum , action = minimax(gameState, 0) #initially starts the level at 0
+        print "evalnum is:", evalNum
+        return action
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
