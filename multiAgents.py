@@ -71,7 +71,7 @@ class ReflexAgent(Agent):
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
         minFoodDist = 1E9
-        totGhostDist = 0
+        minGhostDist = 1E9
         for x in range(newFood.width):
           for y in range(newFood.height):
             if newFood[x][y]:
@@ -86,24 +86,13 @@ class ReflexAgent(Agent):
         for i in range(1, numAgents):
           ghostPos = successorGameState.getGhostPosition(i)
           ghostManDist = abs(ghostPos[0] - newPos[0]) + abs(ghostPos[1] - newPos[1])
-          totGhostDist = totGhostDist + ghostManDist
-        invMinGhostDist = 1.0 / totGhostDist
-        # for x in range(newGhostStates.width):
-        #   for y in range(newGhostStates.height):
-        #     if newGhostStates[x][y]:
-        #       ghostManDist = abs(x - newPos[0]) + abs(y - newPos[1])
-        #       if ghostManDist < minGhostDist:
-        #         minGhostDist = ghostManDist
-        # invMinGhostDist = 1 / minGhostDist
-        # newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-        # totalScareTime = 0
-        # for times in newScaredTimes:
-        #   totalScareTime = times + totalScareTime
-        # if totalScareTime != 0.0:
-        #   invScaredTimes = 1.0 / totalScareTime
-        # else:
-        #   invScaredTimes = 0
+          if ghostManDist < minGhostDist:
+            minGhostDist = ghostManDist
+        invMinGhostDist = 1.0 / minGhostDist
+       
         "*** YOUR CODE HERE ***"
+        if minGhostDist < 3:
+          invMinGhostDist = invMinGhostDist * 100
         totalScore = successorGameState.getScore() + invMinFoodDist - invMinGhostDist 
         #
         #print totalScore
