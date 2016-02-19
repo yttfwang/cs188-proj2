@@ -159,7 +159,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         finalLevel = gameState.getNumAgents() * self.depth 
-        #print "FINAL LEVEL", finalLevel
 
         def minimax(game_state, level):
           agentIndex = level % gameState.getNumAgents()
@@ -167,35 +166,35 @@ class MinimaxAgent(MultiAgentSearchAgent):
             print "Error with minimax function: levels_left should not be <= 0."
             return None
           
-          elif level == finalLevel - 1:
+          elif level == finalLevel - 1: # must be a ghost, minimizer
             bestAction = ''
-            bestEvalNum = float('inf')
-            evalNum = float('inf')
+            lowestEvalNum = 999999
+            #evalNum = -999999
             
             for action in game_state.getLegalActions(agentIndex):
               newState = game_state.generateSuccessor(agentIndex, action)
               
-              #print "DEPTH 0"
+
               evalNum = self.evaluationFunction(newState)
-              if evalNum < bestEvalNum:
-                bestEvalNum = evalNum
+
+              if evalNum < lowestEvalNum:
+                lowestEvalNum = evalNum
                 bestAction = action
             
-            #print "@@@2: ", level
-            #print "@@@1: ", bestEvalNum, bestAction
-            return (bestEvalNum, bestAction)
+            #pdb.set_trace()
+            #print "@@@1: level: ", level, ";  agentIndex: ", agentIndex, ";  actions list: ", game_state.getLegalActions(agentIndex) 
+            #print "@@@2: best eval, action: ", lowestEvalNum, bestAction
+            return (lowestEvalNum, bestAction)
           
           elif level % gameState.getNumAgents() == 0: #Pacman's turn, maximizer
-            #print "LEVEL", level
-            bestAction = ''
-            highestEvalNum = float('-inf')
-            evalNum = float('-inf')
+            bestAction = 'Stop'
+            highestEvalNum = -999999
+            #evalNum = -999999
             
             for action in game_state.getLegalActions(agentIndex):
               newState = game_state.generateSuccessor(agentIndex, action)
               
               if newState.isWin() or newState.isLose():
-                #print "WIN LOSE"
                 evalNum = self.evaluationFunction(newState)
               else:
                 #pdb.set_trace()
@@ -205,19 +204,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 highestEvalNum = evalNum
                 bestAction = action
             
+            #pdb.set_trace()
+            #print "@@@ 3: level: ", level, ";  actions list: ", game_state.getLegalActions(agentIndex) 
+            #print "@@@ 4: highest eval, action: ", highestEvalNum, bestAction
             return (highestEvalNum, bestAction)
 
           else: #Ghosts' turn, minimizer
-            #print "LEVEL", level
-            bestAction = ''
-            lowestEvalNum = float('inf')
-            evalNum = float('inf')
+            bestAction = 'Stop'
+            lowestEvalNum = 999999
+            #evalNum = 999999
             
             for action in game_state.getLegalActions(agentIndex):
               newState = game_state.generateSuccessor(agentIndex, action)
               
               if newState.isWin() or newState.isLose():
-                #print "WIN LOSE"
                 evalNum = self.evaluationFunction(newState)
               else:
                 #pdb.set_trace()
@@ -227,10 +227,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 lowestEvalNum = evalNum
                 bestAction = action
             
+            #pdb.set_trace()
+            #print "@@@  5: level: ", level, ";  actions list: ", game_state.getLegalActions(agentIndex) 
+            #print "@@@  6: lowest eval, action: ", lowestEvalNum, bestAction
             return (lowestEvalNum, bestAction)
 
 
-        #pdb.set_trace()
+        
 
         evalNum , action = minimax(gameState, 0) #initially starts the level at 0
         #print "evalnum is:", evalNum
