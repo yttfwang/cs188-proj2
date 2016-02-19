@@ -273,12 +273,14 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
               # print evalNum
               if evalNum < lowestEvalNum:
                 lowestEvalNum = evalNum
-                
                 bestAction = action
               # if evalNum > bestMax:
               #   bestMax = evalNum
               # if evalNum < bestMin:
               #   bestMin = evalNum
+
+              if lowestEvalNum < bestMax: return (lowestEvalNum, bestAction)
+              bestMin = min(bestMin, lowestEvalNum)
             #pdb.set_trace()
             #print "@@@1: level: ", level, ";  agentIndex: ", agentIndex, ";  actions list: ", game_state.getLegalActions(agentIndex) 
             #print "@@@2: best eval, action: ", lowestEvalNum, bestAction
@@ -311,8 +313,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 highestEvalNum = evalNum
                 bestAction = action
               # print "bestmin", bestMin
-              if evalNum > bestMin:
-                return (highestEvalNum, bestAction)
+              if highestEvalNum > bestMin: return (highestEvalNum, bestAction)
               bestMax = max(bestMax, highestEvalNum)
               # print "bestMax, highestEvalNum", bestMax, highestEvalNum
             #pdb.set_trace()
@@ -348,8 +349,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 lowestEvalNum = evalNum
                 bestAction = action
               # print "bestmax", bestMax
-              if evalNum < bestMax:
-                return (lowestEvalNum, bestAction)
+              if lowestEvalNum < bestMax: return (lowestEvalNum, bestAction)
               bestMin = min(bestMin, lowestEvalNum)
               # print "bestMin, lowestEvalNum", bestMin, lowestEvalNum
             
