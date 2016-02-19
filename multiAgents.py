@@ -106,6 +106,7 @@ def scoreEvaluationFunction(currentGameState):
       This evaluation function is meant for use with adversarial search agents
       (not reflex agents).
     """
+    #print currentGameState.getScore()
     return currentGameState.getScore()
 
 class MultiAgentSearchAgent(Agent):
@@ -158,47 +159,46 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         finalLevel = gameState.getNumAgents() * self.depth 
+        #print "FINAL LEVEL", finalLevel
 
         def minimax(game_state, level):
-          agentIndex = level % self.depth
+          agentIndex = level % gameState.getNumAgents()
           if level >= finalLevel:
             print "Error with minimax function: levels_left should not be <= 0."
             return None
           
           elif level == finalLevel - 1:
             bestAction = ''
-            bestEvalNum = -999999
-            evalNum = -999999
+            bestEvalNum = float('inf')
+            evalNum = float('inf')
             
             for action in game_state.getLegalActions(agentIndex):
               newState = game_state.generateSuccessor(agentIndex, action)
               
-              if newState.isWin():
-                evalNum += 500
-              elif newState.isLose():
-                evalNum += -500
-              else:
-                evalNum = self.evaluationFunction(newState)
-
-              if evalNum > bestEvalNum:
+              #print "DEPTH 0"
+              evalNum = self.evaluationFunction(newState)
+              if evalNum < bestEvalNum:
                 bestEvalNum = evalNum
                 bestAction = action
             
+            #print "@@@2: ", level
+            #print "@@@1: ", bestEvalNum, bestAction
             return (bestEvalNum, bestAction)
           
-          elif level % 3 == 0: #Pacman's turn, maximizer
+          elif level % gameState.getNumAgents() == 0: #Pacman's turn, maximizer
+            #print "LEVEL", level
             bestAction = ''
-            highestEvalNum = -999999
-            evalNum = -999999
+            highestEvalNum = float('-inf')
+            evalNum = float('-inf')
             
             for action in game_state.getLegalActions(agentIndex):
               newState = game_state.generateSuccessor(agentIndex, action)
               
-              if newState.isWin():
-                evalNum += 500
-              elif newState.isLose():
-                evalNum += -500
+              if newState.isWin() or newState.isLose():
+                #print "WIN LOSE"
+                evalNum = self.evaluationFunction(newState)
               else:
+                #pdb.set_trace()
                 evalNum , _ = minimax(newState, level + 1)
 
               if evalNum > highestEvalNum:
@@ -208,18 +208,19 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return (highestEvalNum, bestAction)
 
           else: #Ghosts' turn, minimizer
+            #print "LEVEL", level
             bestAction = ''
-            lowestEvalNum = 999999
-            evalNum = 999999
+            lowestEvalNum = float('inf')
+            evalNum = float('inf')
             
             for action in game_state.getLegalActions(agentIndex):
               newState = game_state.generateSuccessor(agentIndex, action)
               
-              if newState.isWin():
-                evalNum += 500
-              elif newState.isLose():
-                evalNum += -500
+              if newState.isWin() or newState.isLose():
+                #print "WIN LOSE"
+                evalNum = self.evaluationFunction(newState)
               else:
+                #pdb.set_trace()
                 evalNum , _ = minimax(newState, level + 1)
 
               if evalNum < lowestEvalNum:
@@ -229,8 +230,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return (lowestEvalNum, bestAction)
 
 
+        #pdb.set_trace()
+
         evalNum , action = minimax(gameState, 0) #initially starts the level at 0
-        print "evalnum is:", evalNum
+        #print "evalnum is:", evalNum
         return action
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
